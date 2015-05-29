@@ -68,8 +68,4 @@
         android:key="export"
         android:title="@string/pref_title_export" />
 
-    <Preference
-        android:key="logout"
-        android:title="@string/pref_title_logout" />
-
 </PreferenceScreen>

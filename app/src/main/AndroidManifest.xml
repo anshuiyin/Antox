@@ -121,9 +121,6 @@
         <activity
             android:name="im.tox.antox.activities.About"
             android:label="@string/about" />
-        <activity
-            android:name="im.tox.antox.activities.License"
-            android:label="@string/open_source_license" />
     </application>
 
 </manifest>
