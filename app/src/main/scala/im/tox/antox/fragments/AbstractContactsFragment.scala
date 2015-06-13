@@ -161,6 +161,8 @@ abstract class AbstractContactsFragment extends Fragment {
             case 0 =>
               val profile = new Intent(getActivity, classOf[FriendProfileActivity])
               profile.putExtra("key", key)
+              profile.putExtra("avatar", parentItem.image)
+              profile.putExtra("name", parentItem.first)
               startActivity(profile)
 
             case 1 => showDeleteFriendDialog(getActivity, key)
@@ -180,7 +182,7 @@ abstract class AbstractContactsFragment extends Fragment {
               try {
                 group.leave(getResources.getString(R.string.group_default_part_message))
               } catch {
-                case e: ToxException =>
+                case e: ToxException[_] =>
               }
 
               ToxSingleton.save()
@@ -194,9 +196,7 @@ abstract class AbstractContactsFragment extends Fragment {
 
     val alert = builder.create()
     if (parentItem != null) {
-      if (parentItem.viewType != ContactItemType.HEADER) {
-        alert.show()
-      }
+      alert.show()
     }
   }
 
@@ -220,7 +220,7 @@ abstract class AbstractContactsFragment extends Fragment {
               ToxSingleton.tox.deleteFriend(friend.getFriendNumber)
               ToxSingleton.save()
             } catch {
-              case e: ToxException =>
+              case e: ToxException[_] =>
             }
           })
           subscriber.onCompleted()

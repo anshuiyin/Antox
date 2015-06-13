@@ -1,14 +1,16 @@
 package im.tox.antox.activities
 
 import java.io.{File, FileNotFoundException, FileOutputStream, IOException}
+import java.util.Random
 
-import android.app.AlertDialog
+import android.content.DialogInterface.OnClickListener
 import android.content.{Context, DialogInterface, Intent, SharedPreferences}
 import android.graphics.{Bitmap, BitmapFactory}
 import android.net.Uri
-import android.os.{Build, Bundle, Environment}
+import android.os.{Bundle, Environment}
 import android.preference.Preference.OnPreferenceClickListener
-import android.preference.{ListPreference, Preference, PreferenceActivity, PreferenceManager}
+import android.preference.{ListPreference, Preference, PreferenceManager}
+import android.support.v7.app.AlertDialog
 import android.view.{MenuItem, View}
 import android.widget.{ImageButton, Toast}
 import com.google.zxing.{BarcodeFormat, WriterException}
@@ -31,7 +33,11 @@ object ProfileSettingsActivity {
       val stringValue = value.toString
 
       preference match {
+<<<<<<< HEAD
         case lp:ListPreference =>
+=======
+        case lp: ListPreference =>
+>>>>>>> upstream/master
           val index = lp.findIndexOfValue(stringValue)
           preference.setSummary(if (index >= 0) lp.getEntries()(index) else null)
 
@@ -50,21 +56,23 @@ object ProfileSettingsActivity {
   }
 }
 
-class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.OnSharedPreferenceChangeListener {
+class ProfileSettingsActivity extends BetterPreferenceActivity {
 
   private var avatarDialog: AvatarDialog = _
 
   override def onCreate(savedInstanceState: Bundle) {
+    getDelegate.installViewFactory()
+    getDelegate.onCreate(savedInstanceState)
     super.onCreate(savedInstanceState)
+
+    getSupportActionBar.setDisplayHomeAsUpEnabled(true)
+
     addPreferencesFromResource(R.xml.pref_profile)
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
-      getActionBar != null) {
-      getActionBar.setDisplayHomeAsUpEnabled(true)
-    }
+
     bindPreferenceSummaryToValue(findPreference("nickname"))
     val passwordPreference = findPreference("password")
     if (PreferenceManager.getDefaultSharedPreferences(passwordPreference.getContext)
-        .getString(passwordPreference.getKey, "").isEmpty) {
+      .getString(passwordPreference.getKey, "").isEmpty) {
       getPreferenceScreen.removePreference(passwordPreference)
     } else {
       bindPreferenceSummaryToValue(passwordPreference)
@@ -82,7 +90,7 @@ class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.
       }
     })
 
-   val avatarPreference = findPreference("avatar")
+    val avatarPreference = findPreference("avatar")
     avatarPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
       override def onPreferenceClick(preference: Preference): Boolean = {
         avatarDialog.show()
@@ -104,6 +112,50 @@ class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.
         true
       }
     })
+<<<<<<< HEAD
+=======
+
+    val nospamPreference = findPreference("nospam")
+    nospamPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+      override def onPreferenceClick(preference: Preference): Boolean = {
+        val toxSingleton = ToxSingleton.getInstance()
+
+        val builder = new AlertDialog.Builder(ProfileSettingsActivity.this)
+        builder.setMessage(R.string.reset_tox_id_dialog_message)
+          .setTitle(R.string.reset_tox_id_dialog_title)
+
+        builder.setPositiveButton(getString(R.string.reset_tox_id_dialog_confirm), new OnClickListener {
+          override def onClick(dialog: DialogInterface, which: Int): Unit = {
+            try {
+              val random = new Random()
+              val nospam = random.nextInt(1234567890)
+              toxSingleton.tox.setNospam(nospam)
+              val preferences = PreferenceManager.getDefaultSharedPreferences(ProfileSettingsActivity.this)
+              val editor = preferences.edit()
+              editor.putString("tox_id", toxSingleton.tox.getAddress)
+              editor.apply()
+
+              // Display toast to inform user of successful change
+              Toast.makeText(
+                getApplicationContext,
+                getApplicationContext.getResources.getString(R.string.tox_id_reset),
+                Toast.LENGTH_SHORT
+              ).show()
+
+            } catch {
+              case e: ToxException[_] => e.printStackTrace()
+            }
+          }
+        })
+
+        builder.setNegativeButton(getString(R.string.button_cancel), null)
+
+        builder.show()
+
+        true
+      }
+    })
+>>>>>>> upstream/master
 
     avatarDialog = new AvatarDialog(ProfileSettingsActivity.this)
   }
@@ -205,7 +257,7 @@ class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.
           println("Tox is " + ToxSingleton.tox)
           ToxSingleton.tox.setName(name)
         } catch {
-          case e: ToxException => e.printStackTrace()
+          case e: ToxException[_] => e.printStackTrace()
         }
         db.updateUserDetail(activeAccount, key, name)
 
@@ -219,7 +271,7 @@ class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.
         try {
           ToxSingleton.tox.setStatus(newStatus)
         } catch {
-          case e: ToxException => e.printStackTrace()
+          case e: ToxException[_] => e.printStackTrace()
         }
         db.updateUserDetail(activeAccount, key, newStatusString)
 
@@ -228,7 +280,7 @@ class ProfileSettingsActivity extends PreferenceActivity with SharedPreferences.
         try {
           ToxSingleton.tox.setStatusMessage(sharedPreferences.getString(statusMessage, ""))
         } catch {
-          case e: ToxException => e.printStackTrace()
+          case e: ToxException[_] => e.printStackTrace()
         }
         db.updateUserDetail(activeAccount, key, statusMessage)
 

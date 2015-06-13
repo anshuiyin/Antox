@@ -1,28 +1,32 @@
 package im.tox.antox.transfer
 
 import java.io.File
-import java.util
-import java.util.concurrent.ArrayBlockingQueue
 
 import android.content.Context
 import android.os.Environment
 import android.preference.PreferenceManager
 import android.util.Log
-import im.tox.antox.data.{State, AntoxDB}
-import im.tox.antox.tox.{ToxSingleton, Reactive}
-import im.tox.antox.utils.Constants
+import im.tox.antox.data.{AntoxDB, State}
+import im.tox.antox.tox.{IntervalLevels, Intervals, Reactive, ToxSingleton}
+import im.tox.antox.utils.BitmapManager
 import im.tox.antox.wrapper.FileKind
 import im.tox.antox.wrapper.FileKind.AVATAR
 import im.tox.tox4j.core.enums.ToxFileControl
 
-import scala.None
-import scala.collection.JavaConverters._
-
-class FileTransferManager {
+class FileTransferManager extends Intervals {
   private val TAG = "FileTransferManager"
 
   private var _transfers: Map[Long, FileTransfer] = Map[Long, FileTransfer]()
   private var _keyAndFileNumberToId: Map[(String, Integer), Long] = Map[(String, Integer), Long]()
+
+  def isTransferring: Boolean = _transfers.exists(_._2.status == FileStatus.INPROGRESS)
+
+  override def interval: Int = {
+    if (isTransferring)
+      IntervalLevels.WORKING.id
+    else
+      IntervalLevels.AWAKE.id
+  }
 
   def add(t: FileTransfer) = {
     _transfers = _transfers + (t.id -> t)
@@ -187,7 +191,6 @@ class FileTransferManager {
                       fileNumber: Int,
                       data: Array[Byte],
                       context: Context) {
-    Log.d(TAG, "receiveFileData")
     val mTransfer = State.transfers.get(key, fileNumber)
     val state = Environment.getExternalStorageState
     if (Environment.MEDIA_MOUNTED == state) {
@@ -211,7 +214,7 @@ class FileTransferManager {
     Log.d(TAG, "fileFinished")
     val transfer = State.transfers.get(key, fileNumber)
     transfer match {
-      case Some(t) => {
+      case Some(t) =>
         t.status = FileStatus.FINISHED
         val mFriend = ToxSingleton.getAntoxFriend(t.key)
         State.db.fileFinished(key, fileNumber)
@@ -219,6 +222,9 @@ class FileTransferManager {
           if (t.sending) {
             onSelfAvatarSendFinished(key, context)
           } else {
+            // Set current avatar as invalid in avatar cache in order to get it updated to new avatar
+            BitmapManager.setAvatarInvalid(t.file)
+
             mFriend.get.setAvatar(Some(t.file))
             val db = new AntoxDB(context)
             db.updateFriendAvatar(key, t.file.getName)
@@ -228,7 +234,7 @@ class FileTransferManager {
         Reactive.updatedMessages.onNext(true)
         ToxSingleton.updateFriendsList(context)
         ToxSingleton.updateGroupList(context)
-      }
+
       case None => Log.d(TAG, "fileFinished: No transfer found")
     }
   }

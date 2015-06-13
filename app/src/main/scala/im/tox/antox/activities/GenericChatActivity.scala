@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.app.{ActionBar, AppCompatActivity}
 import android.text.InputFilter.LengthFilter
-import android.text.{InputFilter, Editable, TextWatcher}
+import android.text.{Editable, InputFilter, TextWatcher}
 import android.util.Log
 import android.view.{Menu, MenuInflater, View}
 import android.widget._
@@ -20,8 +20,8 @@ import im.tox.antoxnightly.R
 import rx.lang.scala.schedulers.{AndroidMainThreadScheduler, IOScheduler}
 import rx.lang.scala.{Observable, Subscription}
 
-import scala.concurrent.duration._
 import scala.collection.JavaConversions._
+import scala.concurrent.duration._
 
 abstract class GenericChatActivity extends AppCompatActivity {
   val TAG: String = "im.tox.antox.activities.ChatActivity"
@@ -39,7 +39,6 @@ abstract class GenericChatActivity extends AppCompatActivity {
   var titleSub: Subscription = null
   var activeKey: String = null
   var scrolling: Boolean = false
-  var antoxDB: AntoxDB = null
 
   val MESSAGE_LENGTH_LIMIT = Constants.MAX_MESSAGE_LENGTH * 50
 
@@ -57,6 +56,7 @@ abstract class GenericChatActivity extends AppCompatActivity {
     val thisActivity = this
     Log.d(TAG, "key = " + key)
     val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+    val antoxDB = new AntoxDB(this)
     adapter = new ChatMessagesAdapter(this, getMessageList, antoxDB.getMessageIds(key, preferences.getBoolean("action_messages", false)))
     displayNameView = this.findViewById(R.id.displayName).asInstanceOf[TextView]
     statusIconView = this.findViewById(R.id.icon)
@@ -81,8 +81,6 @@ abstract class GenericChatActivity extends AppCompatActivity {
       }
 
     })
-    isTypingBox = this.findViewById(R.id.isTyping).asInstanceOf[TextView]
-    statusTextBox = this.findViewById(R.id.chatActiveStatus).asInstanceOf[TextView]
 
     val b = this.findViewById(R.id.sendMessageButton)
     b.setOnClickListener(new View.OnClickListener() {
@@ -207,9 +205,7 @@ abstract class GenericChatActivity extends AppCompatActivity {
   }
 
   def getMessageList: util.ArrayList[Message] = {
-    if (antoxDB == null) {
-      antoxDB = new AntoxDB(this)
-    }
+    val antoxDB = new AntoxDB(this)
     val preferences: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
     val messageList: util.ArrayList[Message] = antoxDB.getMessageList(activeKey, preferences.getBoolean("action_messages", true))
     messageList

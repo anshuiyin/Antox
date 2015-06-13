@@ -1,21 +1,21 @@
 package im.tox.antox.activities
 
-import java.util.Random
-
-import android.content.{Context, Intent, SharedPreferences}
-import android.net.ConnectivityManager
+import android.content.{Intent, SharedPreferences}
 import android.os.{Build, Bundle}
-import android.preference.{ListPreference, Preference, PreferenceActivity, PreferenceManager}
+import android.preference.{ListPreference, Preference, PreferenceManager}
 import android.view.MenuItem
+<<<<<<< HEAD:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
 import android.widget.Toast
 import im.tox.antox.activities.Settings._
+=======
+import im.tox.antox.activities.SettingsActivity._
+>>>>>>> upstream/master:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
 import im.tox.antox.data.AntoxDB
-import im.tox.antox.tox.{ToxDoService, ToxSingleton}
+import im.tox.antox.tox.{ToxService, ToxSingleton}
 import im.tox.antox.utils.Options
 import im.tox.antoxnightly.R
-import im.tox.tox4j.exceptions.ToxException
 
-object Settings {
+object SettingsActivity {
 
   private val sBindPreferenceSummaryToValueListener: Preference.OnPreferenceChangeListener = new Preference.OnPreferenceChangeListener() {
 
@@ -23,7 +23,11 @@ object Settings {
       val stringValue = value.toString
 
       preference match {
+<<<<<<< HEAD:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
         case lp:ListPreference =>
+=======
+        case lp: ListPreference =>
+>>>>>>> upstream/master:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
           val index = lp.findIndexOfValue(stringValue)
           preference.setSummary(if (index >= 0) lp.getEntries()(index) else null)
 
@@ -42,10 +46,15 @@ object Settings {
   }
 }
 
-class Settings extends PreferenceActivity with SharedPreferences.OnSharedPreferenceChangeListener {
+class SettingsActivity extends BetterPreferenceActivity {
 
   override def onCreate(savedInstanceState: Bundle) {
+    getDelegate.installViewFactory()
+    getDelegate.onCreate(savedInstanceState)
     super.onCreate(savedInstanceState)
+
+    getSupportActionBar.setDisplayHomeAsUpEnabled(true)
+
     addPreferencesFromResource(R.xml.settings_main)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB &&
@@ -54,6 +63,7 @@ class Settings extends PreferenceActivity with SharedPreferences.OnSharedPrefere
     }
 
     bindPreferenceSummaryToValue(findPreference("language"))
+<<<<<<< HEAD:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
 
     val nospamPreference = findPreference("nospam")
     nospamPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -83,6 +93,8 @@ class Settings extends PreferenceActivity with SharedPreferences.OnSharedPrefere
         true
       }
     })
+=======
+>>>>>>> upstream/master:app/src/main/scala/im/tox/antox/activities/SettingsActivity.scala
   }
 
   override def onResume() {
@@ -99,7 +111,7 @@ class Settings extends PreferenceActivity with SharedPreferences.OnSharedPrefere
     if (key == "enable_udp") {
       val toxSingleton = ToxSingleton.getInstance()
       Options.udpEnabled = sharedPreferences.getBoolean("enable_udp", false)
-      val service = new Intent(this, classOf[ToxDoService])
+      val service = new Intent(this, classOf[ToxService])
       this.stopService(service)
       this.startService(service)
     }

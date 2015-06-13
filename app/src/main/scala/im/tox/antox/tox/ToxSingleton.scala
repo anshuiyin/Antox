@@ -6,21 +6,18 @@ import java.nio.charset.Charset
 import java.util
 
 import android.app.NotificationManager
-import android.content.{SharedPreferences, Context}
+import android.content.{Context, SharedPreferences}
 import android.net.ConnectivityManager
-import android.os.Environment
 import android.preference.PreferenceManager
 import android.util.Log
 import im.tox.antox.callbacks._
 import im.tox.antox.data.{AntoxDB, State}
-import im.tox.antox.transfer.{FileStatus, FileTransfer}
 import im.tox.antox.utils._
-import im.tox.antox.wrapper.FileKind.AVATAR
 import im.tox.antox.wrapper._
-import im.tox.tox4j.ToxAvImpl
 import im.tox.tox4j.core.ToxOptions
-import im.tox.tox4j.core.enums.{ToxFileControl, ToxStatus}
+import im.tox.tox4j.core.enums.ToxStatus
 import im.tox.tox4j.exceptions.ToxException
+import im.tox.tox4j.impl.ToxAvJni
 import org.json.JSONObject
 import rx.lang.scala.Observable
 import rx.lang.scala.schedulers.{AndroidMainThreadScheduler, IOScheduler}
@@ -33,7 +30,7 @@ object ToxSingleton {
 
   var tox: ToxCore = _
 
-  var toxAv: ToxAvImpl = _
+  var toxAv: ToxAvJni = _
 
   private var antoxFriendList: AntoxFriendList = _
 
@@ -55,6 +52,9 @@ object ToxSingleton {
 
   var dhtNodes: Array[DhtNode] = Array()
 
+  def interval: Int = {
+    Math.min(State.transfers.interval, tox.interval)
+  }
 
   def getAntoxFriendList: AntoxFriendList = antoxFriendList
 
@@ -317,7 +317,7 @@ object ToxSingleton {
         editor.putString("tox_id", tox.getAddress)
         editor.commit()
       } catch {
-        case e: ToxException => e.printStackTrace()
+        case e: ToxException[_] => e.printStackTrace()
       }
       } else {
         try {
@@ -326,7 +326,7 @@ object ToxSingleton {
           editor.putString("tox_id", tox.getAddress)
           editor.commit()
         } catch {
-          case e: ToxException => e.printStackTrace()
+          case e: ToxException[_] => e.printStackTrace()
         }
       }
 
@@ -381,7 +381,7 @@ object ToxSingleton {
         newStatus = UserStatus.getToxUserStatusFromString(newStatusString)
         tox.setStatus(newStatus)
       } catch {
-        case e: ToxException =>
+        case e: ToxException[_] =>
       } finally {
         db.close()
       }

@@ -1,11 +1,9 @@
 package im.tox.antox.adapters
 
 import java.util
-import java.util.ArrayList
 
 import android.app.Activity
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.view.{Gravity, LayoutInflater, View, ViewGroup}
@@ -55,6 +53,12 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
     notifyDataSetChanged()
   }
 
+  def insert(index: Int, item: LeftPaneItem): Unit = {
+    mData.insert(index, item)
+    mDataOriginal.insert(index, item)
+    notifyDataSetChanged()
+  }
+
   override def getItemViewType(position: Int): Int = {
     val `type` = getItem(position).viewType
     `type`.id
@@ -90,12 +94,6 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
           holder.avatar = newConvertView.findViewById(R.id.avatar).asInstanceOf[CircleImageView]
           holder.countText = newConvertView.findViewById(R.id.unread_messages_count).asInstanceOf[TextView]
           holder.timeText = newConvertView.findViewById(R.id.last_message_timestamp).asInstanceOf[TextView]
-
-        case ContactItemType.HEADER =>
-          newConvertView = mInflater.inflate(R.layout.header_list_item, null)
-          holder.firstText = newConvertView.findViewById(R.id.left_pane_header).asInstanceOf[TextView]
-
-
       }
       newConvertView.setTag(holder)
     } else {
@@ -103,9 +101,9 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
     }
     val item = getItem(position)
     holder.firstText.setText(item.first)
-    if (`type` != ContactItemType.HEADER) {
-      if (item.second != "") holder.secondText.setText(item.second) else holder.firstText.setGravity(Gravity.CENTER_VERTICAL)
-    }
+
+    if (item.second != "") holder.secondText.setText(item.second) else holder.firstText.setGravity(Gravity.CENTER_VERTICAL)
+
     if (`type` == ContactItemType.FRIEND || `type` == ContactItemType.GROUP) {
       if (item.count > 0) {
         holder.countText.setVisibility(View.VISIBLE)
@@ -118,7 +116,7 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
       holder.timeText.setText(TimestampUtils.prettyTimestamp(item.timestamp, isChat = false))
 
       if (item.image.isDefined && item.image.get.exists()) {
-        holder.avatar.setImageURI(Uri.fromFile(item.image.get))
+        BitmapManager.load(item.image.get, holder.avatar, isAvatar = true)
       } else {
         holder.avatar.setImageResource(R.color.grey_light)
       }
@@ -142,6 +140,7 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
     } else if (`type` == ContactItemType.GROUP_INVITE) {
       createGroupInviteClickHandlers(key, acceptButton, rejectButton)
     }
+
     newConvertView
   }
 
@@ -219,11 +218,11 @@ class ContactListAdapter(private var context: Context) extends BaseAdapter with 
             } else {
               mData = mDataOriginal
               val tempList1 = new util.ArrayList[LeftPaneItem]()
-              var tempList2 = new util.ArrayList[LeftPaneItem]()
-              var length = mData.size
+              val tempList2 = new util.ArrayList[LeftPaneItem]()
+              val length = mData.size
               var i = 0
               while (i < length) {
-                var item = mData.get(i)
+                val item = mData.get(i)
                 if (item.first.toUpperCase.startsWith(constraint.toString.toUpperCase)) tempList1.add(item) else if (item.first.toLowerCase.contains(constraint.toString.toLowerCase)) tempList2.add(item)
                 i += 1
               }

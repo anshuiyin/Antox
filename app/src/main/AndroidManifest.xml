@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
@@ -36,9 +37,15 @@
         android:logo="@drawable/ic_actionbar"
         android:theme="@style/CustomActionBarTheme" >
         <service
-            android:name="im.tox.antox.tox.ToxDoService"
+            android:name="im.tox.antox.tox.ToxService"
             android:exported="false"
             android:label="Antox" />
+
+        <receiver android:name="im.tox.antox.utils.BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name="im.tox.antox.activities.MainActivity"
@@ -55,7 +62,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="im.tox.antox.activities.ChatActivity" >
+        <activity
+            android:name="im.tox.antox.activities.ChatActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="im.tox.antox.activities.MainActivity" />
@@ -113,14 +122,17 @@
             android:label="@string/title_activity_create_account"
             android:screenOrientation="portrait" />
         <activity
-            android:name="im.tox.antox.activities.Settings"
-            android:label="@string/action_settings" />
-        <activity
             android:name="im.tox.antox.activities.ProfileSettingsActivity"
             android:label="@string/title_activity_profile_settings" />
         <activity
-            android:name="im.tox.antox.activities.About"
+            android:name="im.tox.antox.activities.AboutActivity"
             android:label="@string/about" />
+<<<<<<< HEAD
+=======
+        <activity
+            android:name="im.tox.antox.activities.SettingsActivity"
+            android:label="@string/title_activity_settings" />
+>>>>>>> upstream/master
     </application>
 
 </manifest>

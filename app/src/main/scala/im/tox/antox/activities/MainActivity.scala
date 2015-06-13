@@ -16,9 +16,9 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.{ActionBarDrawerToggle, AppCompatActivity}
 import android.support.v7.widget.Toolbar
 import android.view.{MenuItem, View, WindowManager}
-import android.widget.{Button, AdapterView, ListView, Toast}
+import android.widget.{AdapterView, ListView, Toast}
 import im.tox.antox.data.{AntoxDB, State}
-import im.tox.antox.tox.{ToxDoService, ToxSingleton}
+import im.tox.antox.tox.ToxSingleton
 import im.tox.antox.utils._
 import im.tox.antoxnightly.R
 
@@ -42,7 +42,7 @@ class MainActivity extends AppCompatActivity {
       val intent = new Intent(this, classOf[ProfileSettingsActivity])
       startActivity(intent)
     } else if (position == 1) {
-      val intent = new Intent(this, classOf[Settings])
+      val intent = new Intent(this, classOf[SettingsActivity])
       startActivity(intent)
     } else if (position == 2) {
       //TODO: uncomment for the future
@@ -64,7 +64,7 @@ class MainActivity extends AppCompatActivity {
         .show()
 
     } else if (position == 3) {
-      val intent = new Intent(this, classOf[About])
+      val intent = new Intent(this, classOf[AboutActivity])
       startActivity(intent)
     } else if (position == 4) {
       State.logout(this)
@@ -123,11 +123,19 @@ class MainActivity extends AppCompatActivity {
     mDrawerList = findViewById(R.id.left_drawer).asInstanceOf[ListView]
     mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START)
     val list = new util.ArrayList[DrawerItem]()
+<<<<<<< HEAD
     list.add(new DrawerItem(getString(R.string.n_profile_options), R.drawable.ic_profile))
     list.add(new DrawerItem(getString(R.string.n_settings), R.drawable.ic_menu_settings))
     list.add(new DrawerItem(getString(R.string.n_create_group), R.drawable.ic_social_add_group))
     list.add(new DrawerItem(getString(R.string.n_about), R.drawable.ic_menu_help))
     list.add(new DrawerItem(getString(R.string.n_logout), R.drawable.ic_logout))
+=======
+    list.add(new DrawerItem(getString(R.string.n_profile_options), R.drawable.ic_person_add_white_24dp))
+    list.add(new DrawerItem(getString(R.string.n_settings), R.drawable.ic_settings_white_24dp))
+    list.add(new DrawerItem(getString(R.string.n_create_group), R.drawable.ic_group_add_white_24dp))
+    list.add(new DrawerItem(getString(R.string.n_about), R.drawable.ic_info_outline_white_24dp))
+    list.add(new DrawerItem(getString(R.string.n_logout), R.drawable.ic_arrow_back_white_24dp))
+>>>>>>> upstream/master
     val drawerListAdapter = new DrawerArrayAdapter(this, R.layout.rowlayout_drawer, list)
     mDrawerList.setAdapter(drawerListAdapter)
     mDrawerList.setOnItemClickListener(new DrawerItemClickListener())

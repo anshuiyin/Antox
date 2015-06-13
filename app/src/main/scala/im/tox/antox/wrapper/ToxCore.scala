@@ -2,18 +2,18 @@ package im.tox.antox.wrapper
 
 import java.io.File
 
-import im.tox.antox.tox.ToxSingleton
+import im.tox.antox.tox.{IntervalLevels, Intervals, ToxSingleton}
 import im.tox.antox.transfer.FileUtils
 import im.tox.antox.utils._
-import im.tox.tox4j.ToxCoreImpl
 import im.tox.tox4j.core.ToxOptions
 import im.tox.tox4j.core.callbacks._
 import im.tox.tox4j.core.enums._
 import im.tox.tox4j.exceptions.ToxException
+import im.tox.tox4j.impl.ToxCoreJni
 
-class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: ToxOptions, data: Array[Byte]) {
+class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: ToxOptions, data: Array[Byte]) extends Intervals {
 
-  val tox: ToxCoreImpl = new ToxCoreImpl(options, data)
+  val tox: ToxCoreJni = new ToxCoreJni(options, data)
 
   def this(antoxFriendList: AntoxFriendList, groupList: GroupList, data: Array[Byte]) {
     this(antoxFriendList: AntoxFriendList, groupList: GroupList, new ToxOptions, data)
@@ -30,8 +30,6 @@ class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: T
   def getTox = tox
 
   def close(): Unit = tox.close()
-
-  override def finalize(): Unit = tox.finalize()
 
   def save(): Array[Byte] = tox.save()
 
@@ -52,6 +50,8 @@ class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: T
 
   def iteration(): Unit = tox.iteration()
 
+  override def interval: Int = IntervalLevels.AWAKE.id
+
   def getSelfKey: String = Hex.bytesToHexString(tox.getPublicKey)
 
   def getSecretKey: Array[Byte] = tox.getSecretKey
@@ -68,7 +68,7 @@ class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: T
       try {
         //FIXME setGroupSelfName(groupNumber, name)
       } catch {
-        case e: ToxException =>
+        case e: ToxException[_]  =>
           println("could not set name in group " + groupNumber)
       }
     }
@@ -152,7 +152,7 @@ class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: T
 
   def fileSendChunk(friendNumber: Int, fileNumber: Int, position: Long, data: Array[Byte]): Unit = tox.fileSendChunk(friendNumber, fileNumber, position, data)
 
-  def fileGetFileId(friendNumber: Int, fileNumber: Int): Array[Byte] = new Array[Byte](0) //tox.fileGetFileId(friendNumber, fileNumber)
+  def fileGetFileId(friendNumber: Int, fileNumber: Int): Array[Byte] = Array[Byte](0) //tox.fileGetFileId(friendNumber, fileNumber)
 
   def callbackFileRequestChunk(callback: FileRequestChunkCallback): Unit = tox.callbackFileRequestChunk(callback)
 
@@ -224,7 +224,7 @@ class ToxCore(antoxFriendList: AntoxFriendList, groupList: GroupList, options: T
         try {
           setGroupSelfName(groupNumber, attemptName)
         } catch {
-          case e: ToxException =>
+          case e: ToxException[_] =>
             successful = false
             attemptName = name + "_"
         }
