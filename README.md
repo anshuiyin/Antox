@@ -8,7 +8,13 @@ Antox is an Android 2.3+ client for Tox. It aims to bring the full multimedia su
 ###Current development
 
 - Adding A/V
-- Improving the design of several features
+- Redesign the profile activity
+- Improve the design of the contacts tab
+- Move search contacts to actionbar
+- Better attachments design similar to Google/Facebook Messenger
+- Ability to delete profiles
+- Develop an in-app solution for scanning QR codes using zbar library
+- Allow you to favourite contacts
 
 ###Getting Antox
 
